@@ -77,3 +77,23 @@ const medicationsHeavierThanDrone = async (
   return totalMedicationsWeight > droneWeightLimit[0].WEIGHT_LIMIT;
 };
 
+export const getDroneCargo = async (
+  req: Request | IDroneCargoMockRequest,
+  res: Response | IMockResponse
+): Promise<any> => {
+  const { droneSerialNumber } = req.query;
+
+  const droneCargo = await query(`
+    SELECT MEDICATION.NAME FROM CARGO INNER JOIN MEDICATION \
+    ON CARGO.MEDICATION_ID = MEDICATION.NAME \
+    WHERE CARGO.SERIAL_ID = "${droneSerialNumber}"
+  `);
+
+  const droneCargoResponse = droneCargo.map((cargo: any) => cargo.NAME);
+  res
+    .status(200)
+    .json({
+      message: "drone cargo retrieve success",
+      payload: droneCargoResponse,
+    });
+};
