@@ -1,8 +1,14 @@
 /* eslint-disable quotes */
 import { connect } from "./DbRunner";
-import { SetupDroneTable } from "./InitDroneTable";
-import { SetupMedicationTable } from "./InitMedicationTable";
+import { InitCargoTable } from "./InitCargoTable";
+import { InitDroneTable } from "./InitDroneTable";
+import { InitMedicationTable } from "./InitMedicationTable";
 
 const db = connect();
-SetupDroneTable(db);
-SetupMedicationTable(db);
+db.serialize(() => {
+    db.run("PRAGMA foreign_keys = 1");
+    InitMedicationTable(db);
+    InitDroneTable(db);
+    InitCargoTable(db);
+});
+

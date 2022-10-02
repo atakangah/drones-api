@@ -1,7 +1,7 @@
 /* eslint-disable quotes */
 import sqlite3 from "sqlite3";
 
-export const SetupMedicationTable = (db: sqlite3.Database): void => {
+export const InitMedicationTable = (db: sqlite3.Database): void => {
   db.serialize(() => {
     db.run("DROP TABLE IF EXISTS MEDICATION ");
 
@@ -16,7 +16,7 @@ export const SetupMedicationTable = (db: sqlite3.Database): void => {
 
     db.run(
       'INSERT OR IGNORE INTO MEDICATION (NAME, WEIGHT, CODE) VALUES \
-        ( "Penycillin", 45, "PEN_45"), \
+        ( "Penycillin", 501, "PEN_45"), \
         ( "Chropromazim", 30, "MAZIM_30") \
       '
     );

@@ -1,8 +1,13 @@
 import { Request, Response } from "express";
-import { IMockRequest, IMockResponse } from "express-types";
-import { insert, query } from "../util/DbRunner";
+import {
+  IDroneCargoMockRequest,
+  IDroneLoadMockRequest,
+  IDroneRegisterMockRequest,
+  IMockResponse,
+} from "express-types";
+import { insert, execStmt, query } from "../util/DbRunner";
 export const registerDrone = async (
-  req: Request | IMockRequest,
+  req: Request | IDroneRegisterMockRequest,
   res: Response | IMockResponse
 ): Promise<any> => {
   const { serialNumber, batteryPercentage, weightLimit, model } = req.body;
@@ -12,5 +17,27 @@ export const registerDrone = async (
         VALUES ("${serialNumber}", "${batteryPercentage}", "${weightLimit}", ${model}, "1")
     `);
 
-  res.status(200).json({ message: "New drone added" });
+  res.status(200).json({ message: `${serialNumber} register success` });
+};
+
+export const loadDrone = async (
+  req: Request | IDroneLoadMockRequest,
+  res: Response | IMockResponse
+): Promise<any> => {
+  const { droneSerialNumber, medicationsNames } = req.body;
+
+  const stmtValues = medicationsNames.map((name: string) => [
+    droneSerialNumber,
+    name,
+  ]);
+
+  await execStmt(
+    `
+    INSERT INTO CARGO (SERIAL_ID, MEDICATION_ID) 
+    VALUES (?, ?)
+  `,
+    stmtValues
+  );
+
+  res.status(200).json({ message: `${droneSerialNumber} load success` });
 };

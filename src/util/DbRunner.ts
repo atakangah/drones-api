@@ -22,6 +22,17 @@ export const insert = (sqlQuery: string): Promise<any> => {
   });
 };
 
+export const execStmt = (sqlQuery: string, values: any[]): Promise<any> => {
+    return new Promise((resolve) => {
+        const stmt = db.prepare(sqlQuery);
+        for (const value of values) {
+            stmt.run(value);
+        }
+        stmt.finalize();
+        resolve(true);
+    });
+};
+
 export const query = (sqlQuery: string): Promise<any> => {
   return new Promise((resolve, reject) => {
     /**
@@ -40,3 +51,4 @@ export const query = (sqlQuery: string): Promise<any> => {
     );
   });
 };
+
