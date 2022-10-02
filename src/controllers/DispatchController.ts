@@ -26,6 +26,17 @@ export const loadDrone = async (
 ): Promise<any> => {
   const { droneSerialNumber, medicationsNames } = req.body;
 
+  const medicationsTooHeavy = await medicationsHeavierThanDrone(
+    droneSerialNumber,
+    medicationsNames
+  );
+
+  if (medicationsTooHeavy) {
+    return res.status(400).json({
+      message: `medications exceed carrying weight of ${droneSerialNumber}`,
+    });
+  }
+
   const stmtValues = medicationsNames.map((name: string) => [
     droneSerialNumber,
     name,
@@ -41,3 +52,28 @@ export const loadDrone = async (
 
   res.status(200).json({ message: `${droneSerialNumber} load success` });
 };
+
+
+const medicationsHeavierThanDrone = async (
+  droneSerialNumber: string,
+  medicationsNames: string[]
+): Promise<boolean> => {
+  const medicationWeights: any[] = medicationsNames.map(
+    async (medication) =>
+      await query(`SELECT WEIGHT FROM MEDICATION WHERE NAME = "${medication}"`)
+  );
+
+  const resolvedMedicationWeights = await Promise.all(medicationWeights);
+
+  const droneWeightLimit = await query(
+    `SELECT WEIGHT_LIMIT FROM DRONE WHERE SERIAL_NUMBER = "${droneSerialNumber}"`
+  );
+
+  const totalMedicationsWeight = resolvedMedicationWeights.reduce(
+    (prev, curr) => prev + curr[0].WEIGHT,
+    0
+  );
+
+  return totalMedicationsWeight > droneWeightLimit[0].WEIGHT_LIMIT;
+};
+
