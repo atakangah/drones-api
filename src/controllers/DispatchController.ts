@@ -53,7 +53,6 @@ export const loadDrone = async (
   res.status(200).json({ message: `${droneSerialNumber} load success` });
 };
 
-
 const medicationsHeavierThanDrone = async (
   droneSerialNumber: string,
   medicationsNames: string[]
@@ -90,10 +89,30 @@ export const getDroneCargo = async (
   `);
 
   const droneCargoResponse = droneCargo.map((cargo: any) => cargo.NAME);
-  res
-    .status(200)
-    .json({
-      message: "drone cargo retrieve success",
-      payload: droneCargoResponse,
-    });
+  res.status(200).json({
+    message: "drone cargo retrieve success",
+    payload: droneCargoResponse,
+  });
+};
+
+export const getAvailableDrones = async (
+  req: Request,
+  res: Response
+): Promise<any> => {
+  const availableDrones = await query(`
+    SELECT DRONE.SERIAL_NUMBER, DRONE.BATTERY_PERCENTAGE, 
+    DRONE.WEIGHT_LIMIT, DRONE_STATE.STATE, DRONE_MODEL.MODEL 
+    FROM DRONE 
+    INNER JOIN DRONE_STATE 
+    ON DRONE_STATE.ID = DRONE.STATE
+    INNER JOIN DRONE_MODEL 
+    ON DRONE_MODEL.ID = DRONE.MODEL
+    WHERE DRONE_STATE.STATE = "IDLE" 
+    OR DRONE_STATE.STATE = "LOADING"
+  `);
+
+  res.status(200).json({
+    message: "available drones retrieve success",
+    payload: availableDrones,
+  });
 };
