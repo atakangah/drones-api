@@ -44,7 +44,6 @@
     "winston": "3.3.3"
   },
   "devDependencies": {
-    "@bull-board/express": "^4.3.2",
     "@types/async": "3.2.5",
     "@types/bcrypt-nodejs": "0.0.31",
     "@types/bluebird": "3.5.33",

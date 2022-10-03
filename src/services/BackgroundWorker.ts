@@ -2,35 +2,30 @@ import { Queue, Worker, QueueScheduler } from "bullmq";
 import IORedis from "ioredis";
 import { Drone } from "../models/Drone";
 import { DbDroneState, DroneState, JobQueue } from "../util/constants";
+import { arrToString } from "../util/converters";
+import { REDIS_SERVER } from "../util/secrets";
 import {
   getAllDrones,
+  log,
   offloadDroneCargo,
+  queryDroneCargo,
   setDroneBatteryPercent,
   setDroneState,
 } from "./DispatchService";
-import { createBullBoard } from "@bull-board/api";
-import { BullAdapter } from "@bull-board/api/bullAdapter";
-import { ExpressAdapter } from "@bull-board/express";
 
-const connection = new IORedis("redis://redis:6379");
+const SIMULATION_INTERVAL = 1000 * 60 * 5;
+const AUDIT_LOG_INTERVAL = 1000 * 60 * 7;
+
+const connection = new IORedis(REDIS_SERVER);
 new QueueScheduler(JobQueue.SIMULATION, { connection });
+new QueueScheduler(JobQueue.AUDIT_LOG, { connection });
 
 const auditQueue = new Queue(JobQueue.AUDIT_LOG, { connection });
 const simulationQueue = new Queue(JobQueue.SIMULATION, { connection });
 
-const serverAdapter = new ExpressAdapter();
-serverAdapter.setBasePath("/admin/queues");
-createBullBoard({
-  queues: [
-    new BullAdapter(auditQueue),
-    new BullAdapter(simulationQueue),
-  ],
-  serverAdapter: serverAdapter,
-});
-
 new Worker(
   JobQueue.SIMULATION,
-  async (job) => {
+  async () => {
     /**
      * - Move drones in LOADED state to DELIVERING & Reduce drone battery by 5%
      * - Move drones in DELIVERING to DELIVERED & Reduce drone battery by 5%
@@ -84,13 +79,26 @@ new Worker(
 
 new Worker(
   JobQueue.AUDIT_LOG,
-  async (job) => {
+  async () => {
     /**
-     * TO-DO
      * - Log state change on a drone
      * - Log medication load onto a drone
-     * - Log battery below 25% on a drone
+     * - Log battery level on a drone
      */
+    const drones = await getAllDrones();
+
+    drones.map(async (drone: Drone) => {
+      await log(
+        `${drone.SERIAL_NUMBER} battery at ${drone.BATTERY_PERCENTAGE}%`
+      );
+
+      await log(`${drone.SERIAL_NUMBER} in ${drone.STATE} state`);
+      const droneCargo = await queryDroneCargo(drone.SERIAL_NUMBER);
+
+      if (droneCargo.length) {
+        await log(`${drone.SERIAL_NUMBER} carrying ${arrToString(droneCargo)}`);
+      }
+    });
   },
   { connection }
 );
@@ -98,7 +106,13 @@ new Worker(
 simulationQueue.add(
   JobQueue.SIMULATION,
   { name: JobQueue.SIMULATION },
-  { repeat: { every: 1000 * 60 } }
+  { repeat: { every: SIMULATION_INTERVAL } }
 );
 
-export { auditQueue, simulationQueue, serverAdapter };
+auditQueue.add(
+  JobQueue.AUDIT_LOG,
+  { name: JobQueue.AUDIT_LOG },
+  { repeat: { every: AUDIT_LOG_INTERVAL } }
+);
+
+export { auditQueue, simulationQueue };
