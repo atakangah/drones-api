@@ -1,4 +1,4 @@
-export interface IDroneRegisterMockRequest {
+export interface IDroneRegisterRequest {
   body: {
     serialNumber: string;
     model: string;
@@ -7,18 +7,18 @@ export interface IDroneRegisterMockRequest {
   };
 }
 
-export interface IDroneLoadMockRequest {
+export interface IDroneLoadRequest {
   body: {
     droneSerialNumber: string;
     medicationsNames: string[];
   };
 }
 
-export interface IDroneCargoMockRequest {
+export interface IDroneCargoRequest {
     query: any;
 }
 
 type JSONResponder = Function;
-export interface IMockResponse {
+export interface IResponse {
   status: JSONResponder;
 }
