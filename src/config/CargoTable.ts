@@ -14,13 +14,6 @@ export const InitCargoTable = (db: sqlite3.Database): void => {
             FOREIGN KEY (SERIAL_ID) REFERENCES DRONE (SERIAL_NUMBER) ON DELETE CASCADE\
         )"
     );
-
-    db.run(
-      'INSERT OR IGNORE INTO CARGO (SERIAL_ID, MEDICATION_ID) VALUES \
-        ( "DRONE1", "Penycillin"), \
-        ( "DRONE1", "Chropromazim") \
-      '
-    );
   });
 };
 

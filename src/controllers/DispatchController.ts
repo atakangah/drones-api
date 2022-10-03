@@ -13,6 +13,7 @@ import {
   queryAvailableDrones,
   queryBatteryPercentage,
   queryDroneCargo,
+  setDroneState,
 } from "../services/DispatchService";
 
 export const registerDrone = async (
@@ -42,13 +43,16 @@ export const loadDrone = async (
     });
   }
 
-  const droneBatteryLow = droneBatteryLowerThan25(droneSerialNumber as string);
+  const droneBatteryLow = await droneBatteryLowerThan25(
+    droneSerialNumber as string
+  );
   if (droneBatteryLow) {
     return res.status(400).json({
       message: `${droneSerialNumber} battery below 25%`,
     });
   }
 
+  await setDroneState("2", droneSerialNumber);
   await execDroneLoad(droneSerialNumber as string, medicationsNames);
 
   res.status(200).json({ message: `${droneSerialNumber} load success` });
@@ -66,7 +70,7 @@ export const getDroneBatteryPercent = async (
 
   res.status(200).json({
     message: "drone battery retrieve success",
-    payload: droneBatteryPercent["BATTERY_PERCENTAGE"],
+    payload: droneBatteryPercent,
   });
 };
 
@@ -95,3 +99,4 @@ export const getAvailableDrones = async (
     payload: availableDrones,
   });
 };
+

@@ -1,5 +1,5 @@
 import { IDroneRegisterRequest } from "express-types";
-import { execStmt, query, insert } from "../util/DbRunner";
+import { execStmt, query, insert } from "../util/dbrunner";
 
 export const insertDrone = async (
   droneParams: IDroneRegisterRequest
@@ -44,13 +44,13 @@ export const droneBatteryLowerThan25 = async (
 };
 
 export const queryBatteryPercentage = async (
-    droneSerialNumber: string
-  ): Promise<any> => {
-    const droneBatteryPercent = await query(`
+  droneSerialNumber: string
+): Promise<any> => {
+  const droneBatteryPercentage = await query(`
       SELECT DRONE.BATTERY_PERCENTAGE FROM DRONE WHERE SERIAL_NUMBER = "${droneSerialNumber}"
     `);
-    return droneBatteryPercent[0];
-  };
+  return droneBatteryPercentage[0]["BATTERY_PERCENTAGE"];
+};
 
 export const execDroneLoad = async (
   droneSerialNumber: string,
@@ -95,4 +95,57 @@ export const queryAvailableDrones = async (): Promise<any> => {
     OR DRONE_STATE.STATE = "LOADING"
   `);
   return availableDrones;
+};
+
+export const getAllDrones = async (): Promise<any> => {
+  return await query(`
+    SELECT DRONE.SERIAL_NUMBER, DRONE.BATTERY_PERCENTAGE, 
+    DRONE.WEIGHT_LIMIT, DRONE_STATE.STATE, DRONE_MODEL.MODEL 
+    FROM DRONE 
+    INNER JOIN DRONE_STATE 
+    ON DRONE_STATE.ID = DRONE.STATE
+    INNER JOIN DRONE_MODEL 
+    ON DRONE_MODEL.ID = DRONE.MODEL
+  `);
+};
+
+export const setDroneState = async (
+  state: string,
+  droneSerialNumber: string
+): Promise<any> => {
+  await execStmt(
+    `
+    UPDATE DRONE SET STATE = ? WHERE SERIAL_NUMBER = ?
+  `,
+    [[state, droneSerialNumber]]
+  );
+};
+
+export const setDroneBatteryPercent = async (
+  batteryPercent: number,
+  droneSerialNumber: string
+): Promise<any> => {
+  await execStmt(
+    `
+    UPDATE DRONE SET BATTERY_PERCENTAGE = ? WHERE SERIAL_NUMBER = ?
+  `,
+    [[batteryPercent, droneSerialNumber]]
+  );
+};
+
+export const offloadDroneCargo = async (
+  droneSerialNumber: string
+): Promise<any> => {
+  await execStmt(
+    `
+      DELETE FROM CARGO WHERE SERIAL_ID = ?
+    `,
+    [droneSerialNumber]
+  );
+};
+
+export const log = async (logMessage: string): Promise<any> => {
+  await insert(`
+    INSERT INTO LOGS(LOG) VALUES("${logMessage}")
+  `);
 };

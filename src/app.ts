@@ -5,9 +5,11 @@ import bodyParser from "body-parser";
 import cookieParser from "cookie-parser";
 import lusca from "lusca";
 import flash from "express-flash";
-import { SESSION_SECRET } from "./util/Secrets";
+import { SESSION_SECRET } from "./util/secrets";
 import apiRouter from "./routes/ApiRouter";
-import "./util/InitDb";
+import "./config/Db";
+import "./services/BackgroundWorker";
+import { serverAdapter } from "./services/BackgroundWorker";
 
 // Create Express server
 const app = express();
@@ -29,6 +31,10 @@ app.use(flash());
 app.use(lusca.xframe("SAMEORIGIN"));
 app.use(lusca.xssProtection(true));
 
+// Bull-board router for background worker visualization
+app.use("/admin/queues", serverAdapter.getRouter());
+
+// main api router
 app.use("/api", apiRouter);
 
 export default app;
