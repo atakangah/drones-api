@@ -97,6 +97,20 @@ export const queryAvailableDrones = async (): Promise<any> => {
   return availableDrones;
 };
 
+
+export const getDrone = async (droneSerialNumber: string): Promise<any> => {
+  return await query(`
+    SELECT DRONE.SERIAL_NUMBER, DRONE.BATTERY_PERCENTAGE, 
+    DRONE.WEIGHT_LIMIT, DRONE_STATE.STATE, DRONE_MODEL.MODEL 
+    FROM DRONE 
+    INNER JOIN DRONE_STATE 
+    ON DRONE_STATE.ID = DRONE.STATE
+    INNER JOIN DRONE_MODEL 
+    ON DRONE_MODEL.ID = DRONE.MODEL
+    WHERE DRONE.SERIAL_NUMBER = "${droneSerialNumber}"
+  `);
+};
+
 export const getAllDrones = async (): Promise<any> => {
   return await query(`
     SELECT DRONE.SERIAL_NUMBER, DRONE.BATTERY_PERCENTAGE, 

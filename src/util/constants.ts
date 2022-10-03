@@ -11,3 +11,12 @@ export enum DroneState {
   DELIVERED = "DELIVERED",
   RETURNING = "RETURNING",
 }
+
+export enum DbDroneState {
+    IDLE = "1",
+    LOADING = "2",
+    LOADED = "3",
+    DELIVERING = "4",
+    DELIVERED = "5",
+    RETURNING = "6",
+}

@@ -5,9 +5,11 @@ import {
   IDroneRegisterRequest,
   IResponse,
 } from "express-types";
+import { DbDroneState, DroneState } from "../util/constants";
 import {
   droneBatteryLowerThan25,
   execDroneLoad,
+  getDrone,
   insertDrone,
   medicationsHeavierThanDrone,
   queryAvailableDrones,
@@ -52,7 +54,16 @@ export const loadDrone = async (
     });
   }
 
-  await setDroneState("2", droneSerialNumber);
+  const drone = await getDrone(droneSerialNumber);
+  if (drone[0].STATE !== DroneState.IDLE && drone[0].STATE !== DroneState.LOADING) {
+    return res
+      .status(400)
+      .json({
+        message: `Loading ${droneSerialNumber} failed. Drone not available`,
+      });
+  }
+
+  await setDroneState(DbDroneState.LOADING, droneSerialNumber);
   await execDroneLoad(droneSerialNumber as string, medicationsNames);
 
   res.status(200).json({ message: `${droneSerialNumber} load success` });
@@ -100,3 +111,24 @@ export const getAvailableDrones = async (
   });
 };
 
+export const dispatchDrone = async (
+  req: Request,
+  res: Response
+): Promise<any> => {
+  const { droneSerialNumber } = req.body;
+
+  const drone = await getDrone(droneSerialNumber);
+  if (drone[0].STATE !== DroneState.LOADING) {
+    return res
+      .status(400)
+      .json({
+        message: `Dispatch ${droneSerialNumber} failed. Drone not loaded`,
+      });
+  }
+
+  await setDroneState(DbDroneState.LOADED, droneSerialNumber);
+
+  res.status(200).json({
+    message: `${droneSerialNumber} dispatch success`,
+  });
+};

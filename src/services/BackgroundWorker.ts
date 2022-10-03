@@ -1,7 +1,7 @@
 import { Queue, Worker, QueueScheduler } from "bullmq";
 import IORedis from "ioredis";
 import { Drone } from "../models/Drone";
-import { DroneState, JobQueue } from "../util/constants";
+import { DbDroneState, DroneState, JobQueue } from "../util/constants";
 import {
   getAllDrones,
   offloadDroneCargo,
@@ -48,14 +48,14 @@ new Worker(
           }
           break;
         case DroneState.LOADED:
-          await setDroneState("4", drone.SERIAL_NUMBER);
+          await setDroneState(DbDroneState.DELIVERING, drone.SERIAL_NUMBER);
           await setDroneBatteryPercent(
             drone.BATTERY_PERCENTAGE - 15,
             drone.SERIAL_NUMBER
           );
           break;
         case DroneState.DELIVERING:
-          await setDroneState("5", drone.SERIAL_NUMBER);
+          await setDroneState(DbDroneState.DELIVERED, drone.SERIAL_NUMBER);
           await setDroneBatteryPercent(
             drone.BATTERY_PERCENTAGE - 25,
             drone.SERIAL_NUMBER
@@ -63,14 +63,14 @@ new Worker(
           break;
         case DroneState.DELIVERED:
           await offloadDroneCargo(drone.SERIAL_NUMBER);
-          await setDroneState("6", drone.SERIAL_NUMBER);
+          await setDroneState(DbDroneState.RETURNING, drone.SERIAL_NUMBER);
           await setDroneBatteryPercent(
             drone.BATTERY_PERCENTAGE - 15,
             drone.SERIAL_NUMBER
           );
           break;
         case DroneState.RETURNING:
-          await setDroneState("1", drone.SERIAL_NUMBER);
+          await setDroneState(DbDroneState.IDLE, drone.SERIAL_NUMBER);
           await setDroneBatteryPercent(
             drone.BATTERY_PERCENTAGE - 25,
             drone.SERIAL_NUMBER
