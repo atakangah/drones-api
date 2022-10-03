@@ -1,0 +1,23 @@
+version: '3'
+
+volumes:
+  data:
+  nodemodules: {}
+
+services:
+  redis:
+    image: redis:latest
+    volumes:
+      - data:/data
+    ports:
+      - 6379:6379
+  drones:
+    build: ./
+    ports:
+      - 3000:3000
+    volumes:
+      - ./:/usr/app/
+      - nodemodules:/usr/app/node_modules
+    command: npm run debug
+    depends_on:
+      - redis
