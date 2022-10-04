@@ -35,7 +35,7 @@ new Worker(
      */
     const drones = await getAllDrones();
 
-    drones.map(async (drone: Drone) => {
+    const auditLogs = drones.map(async (drone: Drone) => {
       switch (drone.STATE) {
         case DroneState.IDLE:
           if (drone.BATTERY_PERCENTAGE != 100) {
@@ -73,6 +73,7 @@ new Worker(
           break;
       }
     });
+    Promise.all(auditLogs);
   },
   { connection }
 );

@@ -5,7 +5,12 @@ import {
   IDroneRegisterRequest,
   IResponse,
 } from "express-types";
-import { DbDroneState, DroneState } from "../types/db-constants";
+import {
+  DbDroneState,
+  DroneModelMap,
+  DroneState,
+  DroneStateMap,
+} from "../types/db-constants";
 import {
   droneBatteryLowerThan25,
   execDroneLoad,
@@ -23,10 +28,19 @@ export const registerDrone = async (
   req: Request | IDroneRegisterRequest,
   res: Response | IResponse
 ): Promise<any> => {
-  const { serialNumber } = req.body;
+  const { serialNumber, model, state, weightLimit, batteryPercentage } =
+    req.body;
+
+  if (!serialNumber || !model || !state || !weightLimit || !batteryPercentage) {
+    return res
+      .status(400)
+      .json({ message: "All required request parameters not provided" });
+  }
+
+  req.body.model = DroneModelMap[model];
+  req.body.state = DroneStateMap[state];
 
   await insertDrone(req);
-
   res.status(200).json({ message: `${serialNumber} register success` });
 };
 
@@ -35,6 +49,14 @@ export const loadDrone = async (
   res: Response | IResponse
 ): Promise<any> => {
   const { droneSerialNumber, medicationsNames } = req.body;
+
+  if (!droneSerialNumber || !medicationsNames) {
+    return res
+      .status(400)
+      .json({
+        message: "Drone serial number or medications names not provided",
+      });
+  }
 
   const medicationsTooHeavy = await medicationsHeavierThanDrone(
     droneSerialNumber,
@@ -77,6 +99,10 @@ export const getDroneBatteryPercent = async (
 ): Promise<any> => {
   const { droneSerialNumber } = req.query;
 
+  if (!droneSerialNumber) {
+    return res.status(400).json({ message: "Drone serial number not provided" });
+  }
+
   const droneBatteryPercent = await queryBatteryPercentage(
     droneSerialNumber as string
   );
@@ -93,6 +119,10 @@ export const getDroneCargo = async (
 ): Promise<any> => {
   const { droneSerialNumber } = req.query;
 
+  if (!droneSerialNumber) {
+    return res.status(400).json({ message: "Drone serial number not provided" });
+  }
+
   const droneCargo = await queryDroneCargo(droneSerialNumber);
 
   res.status(200).json({
@@ -108,7 +138,7 @@ export const getAvailableDrones = async (
   const availableDrones = await queryAvailableDrones();
 
   res.status(200).json({
-    message: "available drones retrieve success",
+    message: "Available drones retrieve success",
     payload: availableDrones,
   });
 };
@@ -118,6 +148,10 @@ export const dispatchDrone = async (
   res: Response
 ): Promise<any> => {
   const { droneSerialNumber } = req.body;
+
+  if (!droneSerialNumber) {
+    return res.status(400).json({ message: "Drone serial number not provided" });
+  }
 
   const drone = await getDrone(droneSerialNumber);
   if (drone[0].STATE !== DroneState.LOADING) {
@@ -141,5 +175,5 @@ export const getAuditLogs = async (
 
   return res
     .status(200)
-    .json({ message: "audit logs retrieve success", payload: auditLogs });
+    .json({ message: "Audit logs retrieve success", payload: auditLogs });
 };

@@ -1,4 +1,5 @@
 import { Router } from "express";
+import { RequestValidator } from "../../middleware/RequestValidator";
 import {
   registerDrone,
   loadDrone,
@@ -11,13 +12,12 @@ import {
 
 const router = Router();
 
-router.post("/register", registerDrone);
-router.post("/load", loadDrone);
-router.get("/cargo", getDroneCargo);
+router.post("/load", RequestValidator, loadDrone);
+router.post("/register", RequestValidator, registerDrone);
+router.post("/dispatch", RequestValidator, dispatchDrone);
+router.get("/battery", RequestValidator, getDroneBatteryPercent);
+router.get("/cargo", RequestValidator, getDroneCargo);
 router.get("/available", getAvailableDrones);
-router.get("/battery", getDroneBatteryPercent);
-router.post("/dispatch", dispatchDrone);
 router.get("/logs", getAuditLogs);
-
 
 export default router;

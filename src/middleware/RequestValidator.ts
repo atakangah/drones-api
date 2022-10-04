@@ -3,10 +3,6 @@ import { getMedication } from "../services/MedicationService";
 import { getDrone } from "../services/DispatchService";
 import { RequestParam } from "../types/request-params";
 
-const sendInvalidRequestParams = async (res: Response): Promise<any> => {
-  res.status(400).json({ message: "Invalid request params / values" });
-};
-
 export const RequestValidator = async (
   req: Request,
   res: Response,
@@ -28,10 +24,7 @@ export const RequestValidator = async (
             req.body[RequestParam.MEDICATIONS_NAMES] ||
               req.query[RequestParam.MEDICATIONS_NAMES]
           );
-        case RequestParam.NAME:
-        case RequestParam.CODE:
-        case RequestParam.WEIGHT:
-        case RequestParam.IMAGE:
+        default:
           return [true];
       }
     }
@@ -45,4 +38,10 @@ export const RequestValidator = async (
   }
 
   next();
+};
+
+const sendInvalidRequestParams = async (res: Response): Promise<any> => {
+  res
+    .status(400)
+    .json({ message: "Invalid or unexpected request params or values" });
 };

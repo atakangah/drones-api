@@ -19,7 +19,7 @@ export const insertMedication = async (
   medication: IMedicationSaveRequest
 ): Promise<any> => {
   const { name, weight, code, image } = medication.body;
-  console.log("meds", name, weight, code, image);
+
   await insert(`
     INSERT INTO MEDICATION (NAME, WEIGHT, CODE, IMAGE)
     VALUES ("${name}", "${weight}", "${code}", "${image}")
