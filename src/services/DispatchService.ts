@@ -97,7 +97,6 @@ export const queryAvailableDrones = async (): Promise<any> => {
   return availableDrones;
 };
 
-
 export const getDrone = async (droneSerialNumber: string): Promise<any> => {
   return await query(`
     SELECT DRONE.SERIAL_NUMBER, DRONE.BATTERY_PERCENTAGE, 
@@ -161,5 +160,11 @@ export const offloadDroneCargo = async (
 export const log = async (logMessage: string): Promise<any> => {
   await insert(`
     INSERT INTO LOGS(LOG) VALUES("${logMessage}")
+  `);
+};
+
+export const getLogs = async (): Promise<any> => {
+  return query(`
+    SELECT * FROM LOGS
   `);
 };

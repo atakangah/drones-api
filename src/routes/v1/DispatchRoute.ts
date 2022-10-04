@@ -6,6 +6,7 @@ import {
   getAvailableDrones,
   getDroneBatteryPercent,
   dispatchDrone,
+  getAuditLogs,
 } from "../../controllers/DispatchController";
 
 const router = Router();
@@ -16,6 +17,7 @@ router.get("/cargo", getDroneCargo);
 router.get("/available", getAvailableDrones);
 router.get("/battery", getDroneBatteryPercent);
 router.post("/dispatch", dispatchDrone);
+router.get("/logs", getAuditLogs);
 
 
 export default router;
