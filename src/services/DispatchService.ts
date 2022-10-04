@@ -1,4 +1,5 @@
 import { IDroneRegisterRequest } from "express-types";
+import { flattenDeep } from "lodash";
 import { execStmt, query, insert } from "../util/dbrunner";
 
 export const insertDrone = async (
@@ -21,19 +22,30 @@ export const medicationsHeavierThanDrone = async (
     async (medication) =>
       await query(`SELECT WEIGHT FROM MEDICATION WHERE NAME = "${medication}"`)
   );
-
   const resolvedMedicationWeights = await Promise.all(medicationWeights);
+  const currentDroneCargo = await queryDroneCargoWeight(droneSerialNumber);
+
+  const totalMedicationsWeight = calculateTotalWeight(
+    currentDroneCargo,
+    resolvedMedicationWeights
+  );
 
   const droneWeightLimit = await query(
     `SELECT WEIGHT_LIMIT FROM DRONE WHERE SERIAL_NUMBER = "${droneSerialNumber}"`
   );
-
-  const totalMedicationsWeight = resolvedMedicationWeights.reduce(
-    (prev, curr) => prev + curr[0].WEIGHT,
-    0
-  );
-
   return totalMedicationsWeight > droneWeightLimit[0].WEIGHT_LIMIT;
+};
+
+const calculateTotalWeight = (
+  currentDroneCargo: any[],
+  medicationWeights: any[]
+) => {
+  return [...currentDroneCargo, ...medicationWeights].reduce((prev, curr) => {
+    if (curr["WEIGHT"]) {
+      return prev + curr.WEIGHT;
+    }
+    return prev + curr[0].WEIGHT;
+  }, 0);
 };
 
 export const droneBatteryLowerThan25 = async (
@@ -68,6 +80,16 @@ export const execDroneLoad = async (
       `,
     stmtValues
   );
+};
+
+export const queryDroneCargoWeight = async (
+  droneSerialNumber: string
+): Promise<any> => {
+  return await query(`
+    SELECT MEDICATION.WEIGHT FROM CARGO INNER JOIN MEDICATION \
+    ON CARGO.MEDICATION_ID = MEDICATION.NAME \
+    WHERE CARGO.SERIAL_ID = "${droneSerialNumber}"
+  `);
 };
 
 export const queryDroneCargo = async (

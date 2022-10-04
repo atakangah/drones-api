@@ -16,7 +16,7 @@ export const InitMedicationTable = (db: sqlite3.Database): void => {
 
     db.run(
       'INSERT OR IGNORE INTO MEDICATION (NAME, WEIGHT, CODE) VALUES \
-        ( "Penycillin", 501, "PEN_45"), \
+        ( "Penycillin", 250, "PEN_45"), \
         ( "Chropromazim", 30, "MAZIM_30") \
       '
     );
