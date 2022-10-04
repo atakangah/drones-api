@@ -28,6 +28,11 @@ export const RequestValidator = async (
             req.body[RequestParam.MEDICATIONS_NAMES] ||
               req.query[RequestParam.MEDICATIONS_NAMES]
           );
+        case RequestParam.NAME:
+        case RequestParam.CODE:
+        case RequestParam.WEIGHT:
+        case RequestParam.IMAGE:
+          return [true];
       }
     }
   );

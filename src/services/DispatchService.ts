@@ -1,12 +1,11 @@
 import { IDroneRegisterRequest } from "express-types";
-import { flattenDeep } from "lodash";
 import { execStmt, query, insert } from "../util/dbrunner";
 
 export const insertDrone = async (
-  droneParams: IDroneRegisterRequest
+  drone: IDroneRegisterRequest
 ): Promise<any> => {
   const { serialNumber, batteryPercentage, weightLimit, model } =
-    droneParams.body;
+    drone.body;
 
   await insert(`
     INSERT INTO DRONE (SERIAL_NUMBER, BATTERY_PERCENTAGE, WEIGHT_LIMIT, MODEL, STATE) 

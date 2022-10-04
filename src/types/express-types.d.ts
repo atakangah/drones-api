@@ -7,6 +7,15 @@ export interface IDroneRegisterRequest {
   };
 }
 
+export interface IMedicationSaveRequest {
+  body: {
+    name: string;
+    weight: number;
+    code: string;
+    image: any;
+  }
+}
+
 export interface IDroneLoadRequest {
   body: {
     droneSerialNumber: string;
