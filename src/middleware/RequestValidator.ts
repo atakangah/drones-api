@@ -1,7 +1,10 @@
 import { NextFunction, Request, Response } from "express";
-import { getMedication } from "../services/MedicationService";
-import { getDrone } from "../services/DispatchService";
 import { RequestParam } from "../types/request-params";
+import { DispatchService } from "../services/DispatchService";
+import { MedicationService } from "../services/MedicationService";
+
+const dispatchService: DispatchService = new DispatchService();
+const medicationService: MedicationService = new MedicationService();
 
 export const RequestValidator = async (
   req: Request,
@@ -15,12 +18,12 @@ export const RequestValidator = async (
     async (key: string) => {
       switch (key) {
         case RequestParam.DRONE_SERIAL_NUMBER:
-          return getDrone(
+          return dispatchService.getDrone(
             req.body[RequestParam.DRONE_SERIAL_NUMBER] ||
               req.query[RequestParam.DRONE_SERIAL_NUMBER]
           );
         case RequestParam.MEDICATIONS_NAMES:
-          return getMedication(
+          return medicationService.getMedication(
             req.body[RequestParam.MEDICATIONS_NAMES] ||
               req.query[RequestParam.MEDICATIONS_NAMES]
           );

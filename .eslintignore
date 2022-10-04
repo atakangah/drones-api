@@ -8,5 +8,5 @@ coverage/*
 /src/public/
 # custom definition files
 /src/types/
-# mock data
-/src/mocks
+# tests
+/src/**/__tests__/*

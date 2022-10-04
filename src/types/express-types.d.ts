@@ -2,6 +2,7 @@ export interface IDroneRegisterRequest {
   body: {
     serialNumber: string;
     model: string;
+    state: string;
     weightLimit: number;
     batteryPercentage: number;
   };

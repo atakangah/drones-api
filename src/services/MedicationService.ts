@@ -1,27 +1,30 @@
 import { IMedicationSaveRequest } from "express-types";
 import { arrToChainOfSQLOR } from "../util/converters";
-import { insert, query } from "../util/dbrunner";
+import { DatabaseService } from "./DatabaseService";
 
-export const getAllMedications = async (): Promise<any> => {
-  return await query(`
+export class MedicationService {
+
+  getAllMedications = async (): Promise<any> => {
+    return await DatabaseService.query(`
         SELECT * FROM MEDICATION
     `);
-};
+  };
 
-export const getMedication = async (names: string[]): Promise<any> => {
-  const chainOfOrClauses = arrToChainOfSQLOR(names);
-  return await query(`
+  getMedication = async (names: string[]): Promise<any> => {
+    const chainOfOrClauses = arrToChainOfSQLOR(names);
+    return await DatabaseService.query(`
         SELECT NAME FROM MEDICATION WHERE ${chainOfOrClauses}
     `);
-};
+  };
 
-export const insertMedication = async (
-  medication: IMedicationSaveRequest
-): Promise<any> => {
-  const { name, weight, code, image } = medication.body;
+  insertMedication = async (
+    medication: IMedicationSaveRequest
+  ): Promise<any> => {
+    const { name, weight, code, image } = medication.body;
 
-  await insert(`
+    await DatabaseService.insert(`
     INSERT INTO MEDICATION (NAME, WEIGHT, CODE, IMAGE)
     VALUES ("${name}", "${weight}", "${code}", "${image}")
   `);
-};
+  };
+}

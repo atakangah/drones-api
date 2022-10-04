@@ -51,8 +51,19 @@ export const InitDroneTable = (db: sqlite3.Database): void => {
     );
 
     db.run(
-      'INSERT OR IGNORE INTO DRONE(SERIAL_NUMBER, BATTERY_PERCENTAGE, WEIGHT_LIMIT, MODEL, STATE) \
-            VALUES("DRONE1", 90, 500, "4", "1")'
+      'INSERT OR IGNORE INTO DRONE(SERIAL_NUMBER, \
+            BATTERY_PERCENTAGE, WEIGHT_LIMIT, MODEL, STATE) VALUES \
+            ("DRONE1", 90, 500, "4", "1"), \
+            ("DRONE2", 100, 100, "1", "1"), \
+            ("DRONE3", 100, 200, "2", "1"), \
+            ("DRONE4", 100, 400, "4", "1"), \
+            ("DRONE5", 100, 300, "3", "1"), \
+            ("DRONE6", 100, 400, "4", "1"), \
+            ("DRONE7", 100, 500, "4", "1"), \
+            ("DRONE8", 100, 100, "1", "1"), \
+            ("DRONE9", 100, 200, "2", "1"), \
+            ("DRONE10", 100, 300, "3", "1") \
+      '
     );
   });
 };

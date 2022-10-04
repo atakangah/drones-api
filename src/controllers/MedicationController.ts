@@ -1,39 +1,45 @@
 import { Request, Response } from "express";
 import { medicationNameValid, medicationCodeValid } from "..//util/validators";
-import {
-  getAllMedications,
-  insertMedication,
-} from "../services/MedicationService";
+import { MedicationService } from "../services/MedicationService";
 
-export const getMedications = async (
-  req: Request,
-  res: Response
-): Promise<any> => {
-  const allMedications = await getAllMedications();
+export class MedicationController {
+  medicationService: MedicationService;
 
-  res
-    .status(200)
-    .json({ message: "Medications retrieve success", payload: allMedications });
-};
-
-export const addMedication = async (
-  req: Request,
-  res: Response
-): Promise<any> => {
-  const { name, code, weight } = req.body;
-
-  if (!name || !code || !weight) {
-    return res
-      .status(400)
-      .json({ message: "All required parameters not provided" });
+  constructor(medicationService: MedicationService | any) {
+    this.medicationService = medicationService;
   }
 
-  if (!medicationNameValid(name) || !medicationCodeValid(code)) {
-    return res
-      .status(400)
-      .json({ message: "Invalid medication code or medication name supplied" });
-  }
+  getMedications = async (
+    req: Request | any,
+    res: Response | any
+  ): Promise<any> => {
+    const allMedications = await this.medicationService.getAllMedications();
 
-  await insertMedication(req);
-  res.status(200).json({ message: "medication add success" });
-};
+    res.status(200).json({
+      message: "Medications retrieve success",
+      payload: allMedications,
+    });
+  };
+
+  addMedication = async (
+    req: Request | any,
+    res: Response | any
+  ): Promise<any> => {
+    const { name, code, weight } = req.body;
+
+    if (!name || !code || !weight) {
+      return res
+        .status(400)
+        .json({ message: "All required parameters not provided" });
+    }
+
+    if (!medicationNameValid(name) || !medicationCodeValid(code)) {
+      return res.status(400).json({
+        message: "Invalid medication code or medication name supplied",
+      });
+    }
+
+    await this.medicationService.insertMedication(req);
+    res.status(200).json({ message: "medication add success" });
+  };
+}

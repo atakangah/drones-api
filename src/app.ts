@@ -7,8 +7,8 @@ import lusca from "lusca";
 import flash from "express-flash";
 import { SESSION_SECRET } from "./util/secrets";
 import apiRouter from "./routes/ApiRouter";
-import "./config/Db";
 import "./services/BackgroundWorker";
+import { DatabaseService } from "./services/DatabaseService";
 
 // Create Express server
 const app = express();
@@ -30,7 +30,11 @@ app.use(flash());
 app.use(lusca.xframe("SAMEORIGIN"));
 app.use(lusca.xssProtection(true));
 
-// main api router with validation middleware
+// Connect & initialize db
+DatabaseService.connect();
+DatabaseService.initialize();
+
+// main api router
 app.use("/api", apiRouter);
 
 export default app;

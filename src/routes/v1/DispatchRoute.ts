@@ -1,23 +1,18 @@
 import { Router } from "express";
 import { RequestValidator } from "../../middleware/RequestValidator";
-import {
-  registerDrone,
-  loadDrone,
-  getDroneCargo,
-  getAvailableDrones,
-  getDroneBatteryPercent,
-  dispatchDrone,
-  getAuditLogs,
-} from "../../controllers/DispatchController";
+import { DispatchController } from "../../controllers/DispatchController";
+import { DispatchService } from "../../services/DispatchService";
 
+const dispatchService = new DispatchService();
+const dispatchController = new DispatchController(dispatchService);
 const router = Router();
 
-router.post("/load", RequestValidator, loadDrone);
-router.post("/register", RequestValidator, registerDrone);
-router.post("/dispatch", RequestValidator, dispatchDrone);
-router.get("/battery", RequestValidator, getDroneBatteryPercent);
-router.get("/cargo", RequestValidator, getDroneCargo);
-router.get("/available", getAvailableDrones);
-router.get("/logs", getAuditLogs);
+router.post("/load", RequestValidator, dispatchController.loadDrone);
+router.post("/register", RequestValidator, dispatchController.registerDrone);
+router.post("/dispatch", RequestValidator, dispatchController.dispatchDrone);
+router.get("/battery", RequestValidator, dispatchController.getDroneBatteryPercent);
+router.get("/cargo", RequestValidator, dispatchController.getDroneCargo);
+router.get("/available", dispatchController.getAvailableDrones);
+router.get("/logs", dispatchController.getAuditLogs);
 
 export default router;
