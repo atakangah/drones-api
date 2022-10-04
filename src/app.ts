@@ -9,6 +9,7 @@ import { SESSION_SECRET } from "./util/secrets";
 import apiRouter from "./routes/ApiRouter";
 import "./config/Db";
 import "./services/BackgroundWorker";
+import { RequestValidator } from "./middleware/RequestValidator";
 
 // Create Express server
 const app = express();
@@ -30,7 +31,7 @@ app.use(flash());
 app.use(lusca.xframe("SAMEORIGIN"));
 app.use(lusca.xssProtection(true));
 
-// main api router
-app.use("/api", apiRouter);
+// main api router with validation middleware
+app.use("/api", RequestValidator, apiRouter);
 
 export default app;

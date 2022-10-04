@@ -5,3 +5,9 @@ export const getAllMedications = async (): Promise<any> => {
         SELECT * FROM MEDICATION
     `);
 };
+
+export const getMedication = async (name: string): Promise<any> => {
+  return await query(`
+        SELECT NAME FROM MEDICATION WHERE NAME = "${name}"
+    `);
+};

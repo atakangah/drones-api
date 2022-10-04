@@ -5,7 +5,7 @@ import {
   IDroneRegisterRequest,
   IResponse,
 } from "express-types";
-import { DbDroneState, DroneState } from "../util/constants";
+import { DbDroneState, DroneState } from "../types/db-constants";
 import {
   droneBatteryLowerThan25,
   execDroneLoad,

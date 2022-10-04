@@ -1,7 +1,7 @@
 import { Queue, Worker, QueueScheduler } from "bullmq";
 import IORedis from "ioredis";
 import { Drone } from "../models/Drone";
-import { DbDroneState, DroneState, JobQueue } from "../util/constants";
+import { DbDroneState, DroneState, JobQueue } from "../types/db-constants";
 import { arrToString } from "../util/converters";
 import { REDIS_SERVER } from "../util/secrets";
 import {
@@ -13,8 +13,8 @@ import {
   setDroneState,
 } from "./DispatchService";
 
-const SIMULATION_INTERVAL = 1000 * 60 * 5;
-const AUDIT_LOG_INTERVAL = 1000 * 60 * 7;
+const SIMULATION_INTERVAL = 1000 * 60 * 3;
+const AUDIT_LOG_INTERVAL = 1000 * 60 * 3.5;
 
 const connection = new IORedis(REDIS_SERVER);
 new QueueScheduler(JobQueue.SIMULATION, { connection });
