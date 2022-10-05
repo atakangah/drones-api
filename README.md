@@ -24,7 +24,8 @@
 
 ## Steps to test
 1. Change directory to project folder (i.e andrews-kangah)
-2. Run `npm run test` to run tests
+2. Run `npm install` to install dependencies
+3. Run `npm run test` to run tests
 
 
 ## Available Endpoints
