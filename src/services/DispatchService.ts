@@ -2,17 +2,22 @@ import { IDroneRegisterRequest } from "express-types";
 import { DatabaseService } from "./DatabaseService";
 
 export class DispatchService {
-
-   insertDrone = async (drone: IDroneRegisterRequest): Promise<any> => {
+  insertDrone = async (drone: IDroneRegisterRequest): Promise<any> => {
     const { serialNumber, batteryPercentage, weightLimit, model } = drone.body;
 
-    await DatabaseService.insert(`
+    const insertResult = await DatabaseService.insert(`
       INSERT INTO DRONE (SERIAL_NUMBER, BATTERY_PERCENTAGE, WEIGHT_LIMIT, MODEL, STATE) 
       VALUES ("${serialNumber}", "${batteryPercentage}", "${weightLimit}", ${model}, "1")
-  `);
+    `);
+
+    if (insertResult) {
+      return { message: `Failed. ${serialNumber} already exists` };
+    }
+
+    return { message: `${serialNumber} add success` };
   };
 
-   medicationsHeavierThanDrone = async (
+  medicationsHeavierThanDrone = async (
     droneSerialNumber: string,
     medicationsNames: string[]
   ): Promise<boolean> => {
@@ -38,7 +43,7 @@ export class DispatchService {
     return totalMedicationsWeight > droneWeightLimit[0].WEIGHT_LIMIT;
   };
 
-   calculateTotalWeight = (
+  calculateTotalWeight = (
     currentDroneCargo: any[],
     medicationWeights: any[]
   ): number => {
@@ -50,7 +55,7 @@ export class DispatchService {
     }, 0);
   };
 
-   droneBatteryLowerThan25 = async (
+  droneBatteryLowerThan25 = async (
     droneSerialNumber: string
   ): Promise<boolean> => {
     const batteryPercentage = await this.queryBatteryPercentage(
@@ -59,16 +64,14 @@ export class DispatchService {
     return batteryPercentage < 25;
   };
 
-   queryBatteryPercentage = async (
-    droneSerialNumber: string
-  ): Promise<any> => {
+  queryBatteryPercentage = async (droneSerialNumber: string): Promise<any> => {
     const droneBatteryPercentage = await DatabaseService.query(`
         SELECT DRONE.BATTERY_PERCENTAGE FROM DRONE WHERE SERIAL_NUMBER = "${droneSerialNumber}"
       `);
     return droneBatteryPercentage[0]["BATTERY_PERCENTAGE"];
   };
 
-   execDroneLoad = async (
+  execDroneLoad = async (
     droneSerialNumber: string,
     medicationsNames: string[]
   ): Promise<any> => {
@@ -86,9 +89,7 @@ export class DispatchService {
     );
   };
 
-   queryDroneCargoWeight = async (
-    droneSerialNumber: string
-  ): Promise<any> => {
+  queryDroneCargoWeight = async (droneSerialNumber: string): Promise<any> => {
     return await DatabaseService.query(`
       SELECT MEDICATION.WEIGHT FROM CARGO INNER JOIN MEDICATION \
       ON CARGO.MEDICATION_ID = MEDICATION.NAME \
@@ -96,7 +97,7 @@ export class DispatchService {
     `);
   };
 
-   queryDroneCargo = async (droneSerialNumber: string): Promise<any> => {
+  queryDroneCargo = async (droneSerialNumber: string): Promise<any> => {
     const droneCargo = await DatabaseService.query(`
       SELECT MEDICATION.NAME FROM CARGO INNER JOIN MEDICATION \
       ON CARGO.MEDICATION_ID = MEDICATION.NAME \
@@ -106,7 +107,7 @@ export class DispatchService {
     return droneCargo.map((cargo: any) => cargo.NAME);
   };
 
-   queryAvailableDrones = async (): Promise<any> => {
+  queryAvailableDrones = async (): Promise<any> => {
     const availableDrones = await DatabaseService.query(`
       SELECT DRONE.SERIAL_NUMBER, DRONE.BATTERY_PERCENTAGE, 
       DRONE.WEIGHT_LIMIT, DRONE_STATE.STATE, DRONE_MODEL.MODEL 
@@ -121,7 +122,7 @@ export class DispatchService {
     return availableDrones;
   };
 
-   getDrone = async (droneSerialNumber: string): Promise<any> => {
+  getDrone = async (droneSerialNumber: string): Promise<any> => {
     return await DatabaseService.query(`
       SELECT DRONE.SERIAL_NUMBER, DRONE.BATTERY_PERCENTAGE, 
       DRONE.WEIGHT_LIMIT, DRONE_STATE.STATE, DRONE_MODEL.MODEL 
@@ -134,7 +135,7 @@ export class DispatchService {
     `);
   };
 
-   getAllDrones = async (): Promise<any> => {
+  getAllDrones = async (): Promise<any> => {
     return await DatabaseService.query(`
       SELECT DRONE.SERIAL_NUMBER, DRONE.BATTERY_PERCENTAGE, 
       DRONE.WEIGHT_LIMIT, DRONE_STATE.STATE, DRONE_MODEL.MODEL 
@@ -146,7 +147,7 @@ export class DispatchService {
     `);
   };
 
-   setDroneState = async (
+  setDroneState = async (
     state: string,
     droneSerialNumber: string
   ): Promise<any> => {
@@ -158,7 +159,7 @@ export class DispatchService {
     );
   };
 
-   setDroneBatteryPercent = async (
+  setDroneBatteryPercent = async (
     batteryPercent: number,
     droneSerialNumber: string
   ): Promise<any> => {
@@ -170,9 +171,7 @@ export class DispatchService {
     );
   };
 
-   offloadDroneCargo = async (
-    droneSerialNumber: string
-  ): Promise<any> => {
+  offloadDroneCargo = async (droneSerialNumber: string): Promise<any> => {
     await DatabaseService.execStmt(
       `
         DELETE FROM CARGO WHERE SERIAL_ID = ?
@@ -181,13 +180,13 @@ export class DispatchService {
     );
   };
 
-   log = async (logMessage: string): Promise<any> => {
+  log = async (logMessage: string): Promise<any> => {
     await DatabaseService.insert(`
       INSERT INTO LOGS(LOG) VALUES("${logMessage}")
     `);
   };
 
-   getLogs = async (): Promise<any> => {
+  getLogs = async (): Promise<any> => {
     return DatabaseService.query(`
       SELECT * FROM LOGS
     `);

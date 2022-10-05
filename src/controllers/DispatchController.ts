@@ -14,10 +14,10 @@ export class DispatchController {
     this.dispatchService = dispatcherService;
   }
 
-  async registerDrone(
+  registerDrone = async (
     req: Request | any,
     res: Response | any
-  ): Promise<any> {
+  ): Promise<any> => {
     const { serialNumber, model, state, weightLimit, batteryPercentage } =
       req.body;
 
@@ -36,14 +36,11 @@ export class DispatchController {
     req.body.model = DroneModelMap[model];
     req.body.state = DroneStateMap[state];
 
-    await this.dispatchService.insertDrone(req);
-    res.status(200).json({ message: `${serialNumber} register success` });
-  }
+    const registerResult = await this.dispatchService.insertDrone(req);
+    res.status(200).json(registerResult);
+  };
 
-  loadDrone = async (
-    req: Request | any,
-    res: Response | any
-  ): Promise<any> => {
+  loadDrone = async (req: Request | any, res: Response | any): Promise<any> => {
     const { droneSerialNumber, medicationsNames } = req.body;
 
     if (!droneSerialNumber || !medicationsNames) {

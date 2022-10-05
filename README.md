@@ -112,7 +112,7 @@
     GET  
 
 - **api/v1/drone/logs**:
-  Returns audit logs of drones. Audit logs are logs of drone status changes, drone battery changes and medicatioins carried on drones. AuditLog background worker generates these logs
+  Returns audit logs of drones. Audit logs are logs of drone status changes, drone battery changes and medicatioins carried on drones. Drones in `IDLE` or `LOADING` state are not logged to reduce unnecessary loggin. AuditLog background worker generates these logs
 
   - Params
     ------
@@ -140,7 +140,7 @@
 - Better error Handling at database wrapper
 
 ## PS
-- Background workers run every 5 minutes for simulation and every 7 minutes for audit logs. 
+- Background workers run every 3 minutes for simulation and every 4 minutes for audit logs. 
 - If logs do not show at the start, retry after some few minutes.
 - Alternatively, modify `SIMULATION_INTERVAL` and `AUDIT_LOG_INTERVAL` in code to speed things up. 
 - But also make sure `AUDIT_LOG_INTERVAL` is just a little slower than `SIMULATION_INTERVAL` as audit logs pickup after simulation chanages.

@@ -39,7 +39,7 @@ export class MedicationController {
       });
     }
 
-    await this.medicationService.insertMedication(req);
-    res.status(200).json({ message: "medication add success" });
+    const medicationAddResult = await this.medicationService.insertMedication(req);
+    res.status(200).json(medicationAddResult);
   };
 }

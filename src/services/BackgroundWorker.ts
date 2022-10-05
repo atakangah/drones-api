@@ -8,8 +8,8 @@ import { DispatchService } from "./DispatchService";
 
 const dispatchService: DispatchService = new DispatchService();
 
-const SIMULATION_INTERVAL = 1000 * 60 * 5;
-const AUDIT_LOG_INTERVAL = 1000 * 60 * 7;
+const SIMULATION_INTERVAL = 1000 * 60 * 3;
+const AUDIT_LOG_INTERVAL = 1000 * 60 * 4;
 
 const connection = new IORedis(REDIS_SERVER);
 new QueueScheduler(JobQueue.SIMULATION, { connection });
@@ -99,13 +99,16 @@ new Worker(
     const drones = await dispatchService.getAllDrones();
 
     const auditLogs = drones.map(async (drone: Drone) => {
-      await dispatchService.log(
-        `${drone.SERIAL_NUMBER} battery at ${drone.BATTERY_PERCENTAGE}%`
-      );
+      if (drone.STATE !== DroneState.IDLE) {
+        await dispatchService.log(
+          `${drone.SERIAL_NUMBER} battery at ${drone.BATTERY_PERCENTAGE}%`
+        );
 
-      await dispatchService.log(
-        `${drone.SERIAL_NUMBER} in ${drone.STATE} state`
-      );
+        await dispatchService.log(
+          `${drone.SERIAL_NUMBER} in ${drone.STATE} state`
+        );
+      }
+
       const droneCargo = await dispatchService.queryDroneCargo(
         drone.SERIAL_NUMBER
       );

@@ -22,9 +22,15 @@ export class MedicationService {
   ): Promise<any> => {
     const { name, weight, code, image } = medication.body;
 
-    await DatabaseService.insert(`
-    INSERT INTO MEDICATION (NAME, WEIGHT, CODE, IMAGE)
-    VALUES ("${name}", "${weight}", "${code}", "${image}")
-  `);
+    const insertResult = await DatabaseService.insert(`
+      INSERT INTO MEDICATION (NAME, WEIGHT, CODE, IMAGE)
+      VALUES ("${name}", "${weight}", "${code}", "${image}")
+    `);
+    
+    if (insertResult) {
+      return {message: `Failed. ${name} already exists`};
+    }
+
+    return {message: `${name} add success`};
   };
 }
