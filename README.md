@@ -1,72 +1,145 @@
-## Drones
+# DRONES API
 
-[[_TOC_]]
+## Pre-requisites
+1. Install node package manger (npm)
+2. Visual studio code (Optional - for visualizing SQLite database)
+3. SQLite Visual Studio Code Extension (Required if using Vscode to visualize database);
+4. Install Docker
+  
 
----
+## Steps to run
+1. Clone repository to desired location
+2. Change directory into the project folder (i.e andrews-kangah)
+3. Make sure docker is running
+4. Run `docker-compose up` to start docker build and bring application up
+5. You can also run `docker-compose up -d` to run application in background and run `docker ps` to see the process
+6. Make requests to [BASE_URL](http://localhost:3000)
+   
 
-:scroll: **START**
+## Steps to build
+1. Change directory to project foler (i.e andrews-kangah)
+2. Make sure docker is running
+3. Run `docker build -t drones:latest .` to build latest image
 
 
-### Introduction
+## Steps to test
+1. Change directory to project folder (i.e andrews-kangah)
+2. Run `npm run test` to run tests
 
-There is a major new technology that is destined to be a disruptive force in the field of transportation: **the drone**. Just as the mobile phone allowed developing countries to leapfrog older technologies for personal communication, the drone has the potential to leapfrog traditional transportation infrastructure.
 
-Useful drone functions include delivery of small items that are (urgently) needed in locations with difficult access.
+## Available Endpoints
+- **api/v1/register**:
+  Registers a new drone in the fleet
 
----
+  - Params
+    ------
+    - `serialNumber`: Serial number of drone e.g DRONE1
+    - `model`: Drone model (Lightweight, Middleweight, Cruiserweight, Heavyweight)
+    - `state`: Drone state (IDLE, LOADING, LOADED, DELIVERING, DELIVERED, RETURNING)
+    - `weightLimit`: Maximum carrying weight of drone
+    - `batteryPercentage`: Current battery percent of drone
 
-### Task description
+  - Method
+    ------
+    POST
 
-We have a fleet of **10 drones**. A drone is capable of carrying devices, other than cameras, and capable of delivering small loads. For our use case **the load is medications**.
+- **api/v1/load**:
+  Loads specified medications onto specified drone
 
-A **Drone** has:
-- serial number (100 characters max);
-- model (Lightweight, Middleweight, Cruiserweight, Heavyweight);
-- weight limit (500gr max);
-- battery capacity (percentage);
-- state (IDLE, LOADING, LOADED, DELIVERING, DELIVERED, RETURNING).
+  - Params
+    ------
+    - `droneSerialNumber`: Serial number of drone to load e.g DRONE1
+    - `medicationsNames`: List of medicine names to load onto drone e.g [Penycillin]
+  
+  - Method
+    ------
+    POST
 
-Each **Medication** has: 
-- name (allowed only letters, numbers, ‘-‘, ‘_’);
-- weight;
-- code (allowed only upper case letters, underscore and numbers);
-- image (picture of the medication case).
 
-Develop a service via REST API that allows clients to communicate with the drones (i.e. **dispatch controller**). The specific communicaiton with the drone is outside the scope of this task. 
+- **api/v1/cargo**:
+  Returns a list of medications loaded on a specified drone
 
-The service should allow:
-- registering a drone;
-- loading a drone with medication items;
-- checking loaded medication items for a given drone; 
-- checking available drones for loading;
-- check drone battery level for a given drone;
+  - Params
+    ------
+    - `droneSerialNumber`: Serial of number of drone to get loaded medicatioins e.g DRONE1
 
-> Feel free to make assumptions for the design approach. 
+  - Method
+    ------
+    GET
 
----
+- **api/v1/available**:
+  Returns a list of available drones i.e drones in IDLE/LOADING state. Drones set in LOADING state by some other user can also be loaded by other users (Assumed design spec).
 
-### Requirements
+  - Params
+    ------
+    - `droneSerialNumber`: Serial of number of drone to get loaded medicatioins e.g DRONE1
 
-While implementing your solution **please take care of the following requirements**: 
+  - Method
+    ------
+    GET
 
-#### Functional requirements
+- **api/v1/battery**:
+  Returns the current battery percentage of specified drone
 
-- There is no need for UI;
-- Prevent the drone from being loaded with more weight that it can carry;
-- Prevent the drone from being in LOADING state if the battery level is **below 25%**;
-- Introduce a periodic task to check drones battery levels and create history/audit event log for this.
+  - Params
+    ------
+    - `droneSerialNumber`: Serial of number of drone to get loaded medicatioins e.g DRONE1
 
----
+  - Method
+    ------
+    GET  
 
-#### Non-functional requirements
+- **api/v1/dispatch**:
+  Sets specified drone's status to `LOADED`. Drones in loaded state are picked up by background simulation worker and simulated to deliver medications and return with battery status dropping. Drones in IDLE state get battery charged back to 100%
 
-- Input/output data must be in JSON format;
-- Your project must be buildable and runnable;
-- Your project must have a README file with build/run/test instructions (use DB that can be run locally, e.g. in-memory, via container);
-- Required data must be preloaded in the database.
-- JUnit tests are optional but advisable (if you have time);
-- Advice: Show us how you work through your commit history.
+  - Params
+    ------
+    - `droneSerialNumber`: Serial of number of drone to dispatch e.g DRONE1
 
----
+  - Method
+    ------
+    POST
 
-:scroll: **END** 
+- **api/v1/medication/all**:
+  Returns all medications in database
+
+  - Params
+    ------
+
+  - Method
+    ------
+    GET  
+
+- **api/v1/drone/logs**:
+  Returns audit logs of drones. Audit logs are logs of drone status changes, drone battery changes and medicatioins carried on drones. AuditLog background worker generates these logs
+
+  - Params
+    ------
+
+  - Method
+    ------
+    GET
+
+- **api/v1/register**:
+  Registers a new drone in the fleet
+
+  - Params
+    ------
+    - `name`: Name of medication (allowed only letters, numbers, ‘-‘, ‘_’) e.g Amoxicillin 
+    - `weight`: Weight of medication. Note: medication cannot weigh more than 500
+    - `code`: Medication code (allowed only upper case letters, underscore and numbers) e.g AMOXI_9
+    - `image`: Image of medication. (Appropriate image handler not implemented so set please set `null`)
+
+  - Method
+    ------
+    POST
+
+
+## Improvements Needed
+- Better error Handling at database wrapper
+
+## PS
+- Background workers run every 5 minutes for simulation and every 7 minutes for audit logs. 
+- If logs do not show at the start, retry after some few minutes.
+- Alternatively, modify `SIMULATION_INTERVAL` and `AUDIT_LOG_INTERVAL` in code to speed things up. 
+- But also make sure `AUDIT_LOG_INTERVAL` is just a little slower than `SIMULATION_INTERVAL` as audit logs pickup after simulation chanages.
